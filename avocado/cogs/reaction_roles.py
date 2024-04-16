@@ -26,6 +26,14 @@ class ReactionRoles(commands.Cog):
         if guild is None:
             # Check if we're still in the guild and it's cached.
             return
+        
+        # remove other reactions if the user has reacted to a different emoji
+        message = await self.bot.get_channel(payload.channel_id).fetch_message(self.role_message_id)
+        for reaction in message.reactions:
+            async for user in reaction.users():
+                if user.id == payload.user_id and str(reaction.emoji) != str(payload.emoji):
+                    await message.remove_reaction(reaction.emoji, user)
+                    break
 
         try:
             role_id = self.emoji_to_role[payload.emoji]
