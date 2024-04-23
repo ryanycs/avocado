@@ -5,7 +5,7 @@ from discord.ext import commands
 class ReactionRoles(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.role_message_id = 1229718858152153099  # ID of the message that can be reacted to to add/remove a role.
+        self.role_message_id = [1229718858152153099, 1232220303971586059]  # ID of the message that can be reacted to to add/remove a role.
         self.emoji_to_role = {
             discord.PartialEmoji(name='🔴'): 1229697235646943286,  # ID of the role associated with unicode emoji '🔴'.
             discord.PartialEmoji(name='🟠'): 1229697442161623111,  # ID of the role associated with unicode emoji '🟠'.
@@ -13,13 +13,14 @@ class ReactionRoles(commands.Cog):
             discord.PartialEmoji(name='🟢'): 1229697686442082354,  # ID of the role associated with unicode emoji '🟢'.
             discord.PartialEmoji(name='🔵'): 1229698118950453289,  # ID of the role associated with unicode emoji '🔵'.
             discord.PartialEmoji(name='🟣'): 1229697876007845889,  # ID of the role associated with unicode emoji '🟣'.
+            discord.PartialEmoji(name='kirby_cum', id=1194886641265934366): 1232205080950738995,
         }
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         """Gives a role based on a reaction emoji."""
         # Make sure that the message the user is reacting to is the one we care about.
-        if payload.message_id != self.role_message_id:
+        if payload.message_id not in self.role_message_id:
             return
 
         guild = self.bot.get_guild(payload.guild_id)
@@ -28,7 +29,7 @@ class ReactionRoles(commands.Cog):
             return
         
         # remove other reactions if the user has reacted to a different emoji
-        message = await self.bot.get_channel(payload.channel_id).fetch_message(self.role_message_id)
+        message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
         for reaction in message.reactions:
             async for user in reaction.users():
                 if user.id == payload.user_id and str(reaction.emoji) != str(payload.emoji):
@@ -61,7 +62,7 @@ class ReactionRoles(commands.Cog):
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         """Removes a role based on a reaction emoji."""
         # Make sure that the message the user is reacting to is the one we care about.
-        if payload.message_id != self.role_message_id:
+        if payload.message_id not in self.role_message_id:
             return
 
         guild = self.bot.get_guild(payload.guild_id)
